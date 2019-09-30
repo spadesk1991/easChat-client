@@ -18,6 +18,9 @@ import Mine from './components/Mine'
 import Plus from './components/Plus'
 import axios from 'axios'
 
+// 建立socket.io通信
+// const socket = io.connect('http://localhost:8081/api')
+// Vue.use()
 export default {
   name: 'Home',
   data () {
@@ -84,11 +87,30 @@ export default {
       this.show = !this.show
     }
   },
+  sockets: {
+    connect: function () {
+      console.log('socket connected')
+    },
+    customEmit: function (data) {
+      console.log('this method was fired by the socket server. eg: io.emit("customEmit", data)')
+    }
+  },
   mounted () {
     const me = window.localStorage.getItem('me')
     axios.get(`/api/user?username=${me}`).then(function (data) {
-      const socket = new WebSocket(`ws://localhost:12345/ws/${data.data._id}`)
-      window.ws = socket
+      // const socket = io('http://localhost8080/ws')
+      this.$socket.emit('login', me)
+      this.$socket.on('connect', function () {
+        console.log('start' + 111111)
+      })
+      this.$socket.on('event', function (data) {
+        console.log(data)
+      })
+      this.$socket.on('disconnect', function () {
+        console.log('disconnect')
+      })
+      // const socket = new WebSocket(`ws://localhost:8080`)
+      // window.ws = this.$socket
     })
     this.getContactList()
   }
